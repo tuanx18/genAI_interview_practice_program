@@ -33,15 +33,25 @@ You answer → GPT-4o-mini scores you (0–10) + gives detailed feedback + impro
 ## Folder Structure
 
 interview_trainer/
+
 ├── assets/
+
 │   ├── questions.json          ← Your question bank
+
 │   ├── history.jsonl           ← All past attempts + scores
+
 │   ├── grading_prompt.txt      ← Editable AI prompt template
+
 ├── main.py                     ← Main interview trainer
+
 ├── builder.py                  ← Question editor tool
+
 ├── .env                        ← OpenAI API key
+
 ├── run.bat                     ← Double-click to start
+
 ├── requirements.txt
+
 └── README.md
 
 ---
