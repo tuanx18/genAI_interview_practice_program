@@ -30,6 +30,26 @@ You answer → GPT-4o-mini scores you (0–10) + gives detailed feedback + impro
 
 ---
 
+## Screenshots
+
+### 1. Sample question display
+
+<img width="1920" height="1027" alt="image" src="https://github.com/user-attachments/assets/e8267307-4b68-4d49-96fb-29cb01f447f7" />
+
+### 2. Display AI-generated result after a submission
+
+<img width="1916" height="1030" alt="image" src="https://github.com/user-attachments/assets/d03e6cd5-67ef-48eb-a778-696da698c355" />
+
+### 3. Show record history
+
+<img width="939" height="683" alt="image" src="https://github.com/user-attachments/assets/a2d76afc-f3d9-4bbc-a58c-7b06747405ba" />
+
+### 4. Builder tool (for expanding the bank)
+
+<img width="1920" height="1029" alt="image" src="https://github.com/user-attachments/assets/b7125774-77b8-4576-acc6-f07d4ddcbf52" />
+
+---
+
 ## Folder Structure
 
 interview_trainer/
