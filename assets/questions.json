@@ -1,0 +1,50 @@
+[
+  {
+    "qid": "5",
+    "category": "Spark",
+    "question": "What is the High-level Architecture of Spark?",
+    "quick_answer": "Spark Architecture:\n1 - Driver Program: coordinates execution, creates SparkContext, schedules task\n2 - Cluster Manager: Allocates resources \n3 - Executor: Run tasks, store data in memory/disk, reports result back to driver\n4 - Tasks: smallest unit of execution, distributed across executors\nDrivers runs your code and create SparkSession → builds a logical plan and then an optimized DAG\nWhen an action is triggered, the driver breaks the DAG into stages and tasks.\nThe driver asks the Cluster Manager for resources, and cluster manager allocates executors.\nExecutors run tasks on parallel on each data partition\nCommunication, task scheduling, status update → all coordinated by driver",
+    "short_answer": "Spark Architecture:\n1 - Driver Program: coordinates execution, creates SparkContext, schedules task\n2 - Cluster Manager: Allocates resources (YARN, Mesos, Kubernetes, Spark's standalone manager)\n3 - Executor: Run tasks, store data in memory/disk, and reports results back to the driver\n4 - Tasks: Smallest unit of execution, distributed across executors\n\nHigh-level: A Spark application has a Driver, a cluster and multiple Executors.\nThe driver: runs your code and create SparkSesson which builds a logical plan + an optimized DAG\nWhen an action is triggered: the driver breaks the DAG into stages and tasks. The driver asks the Cluster Manager for resources, and the CM allocates executors\nExecutors: run the task in parallel on each data partition, performing computation\nAll communication, task scheduling, status updates, data movement = done by the driver",
+    "link": "https://www.interviewbit.com/blog/apache-spark-architecture/"
+  },
+  {
+    "qid": "6",
+    "category": "Spark",
+    "question": "What are the core data abstractions in Spark (RDD, Dataframe, Dataset)?",
+    "quick_answer": "1 - RDD (Resilient Distributed Dataset): immutable, distributed collection of objects, support transformations (map, filter) and actions (collect, count), fault tolerance via linage\n2 - DataFrame: distributed collection of data organized into named columns, build on top of RDDs, optimized by Catalyst, similiar to SQL tables\n3 - Dataset: strongly typed API",
+    "short_answer": "1 - RDD (Resilient Distributed Dataset): the lowest-level abstraction. Immutable, distributed collection of objects.\nUse case: when you need fine-grained control over transformations, or when working with unstructured data\nLimitations: No bult-in optimization, no schema, harder to use for SQL-like queries\nExample: Create a RDD from a list: rdd = spark.sparkContext.parallelize([1, 2, 3, 4, 5])\nTransformation: multiply each element by 2: rdd_transformed = rdd.map(lambda x: x * 2)\nAction - collect result: print(rdd_transformed.collect())   # Output: [2, 4, 6, 8, 10]\n\n2 - DataFrame: Distributed collection of data organized into named columns\nUse case: Best for structured/semi-structured data. SQL-like operations., can use PySpark & SparkSQL\nAdvantages: Optimized by Catalyst Optimizer and Tungsten execution engine\nLimitations: Not strongly typed in Python (fine in scala)\n\n3 - Dataset (Scala/Java only): Strongly typed API. Combines RDD's safty with DataFrame's optimization\nUse case: When you want to compile-time type checking and performance\nLimiations: Not available in PySpark",
+    "link": "https://luminousmen.com/post/spark-core-concepts-explained/"
+  },
+  {
+    "qid": "7",
+    "category": "Spark",
+    "question": "Why is a DataFrame more optimized (compared with RDDs)?",
+    "quick_answer": "DataFrames is faster than RDDs: because Spark applies query optimization techniques\n1 - Catalyst Optimizer: rule-based and cost-based optimizer for query plans, it rewrites queries for efficiency\n2 - Tungsten Execution Engine: improves performance with whole-stage code generation\n3 - Columnar Storage & Vectorization: often use columnar formats, enables efficient compression and vectorized reads",
+    "short_answer": "Interviewing Tip: Say that DataFrames are optimized because Spark can \"\"understand\"\" the schema and apply relational  optimizations, whereas RDDs are just raw objects with no schema\nDataFrames are faster than RDDs because Spark applies query optimization techniques under the hood:\n1 - Catalyst Optimizer\n+ Rule-based and cost-based optimizer for query plans\n+ It rewrites queries for efficiency (pushing filters down, reordering joins)\n+ Examples: df.filter(\"\"age > 30\"\".select(\"\"name\"\") -> Spark internally optimizes the execution plan\n\n2 - Tungsten Execution Engine\n+ Improves performance with whole-stage code generation (complies queries into optimized Java Bytecode)\n+ Use off-heap memory management to reduce garbage collection overhead\n+ Employs cache-aware computation for better CPU ultilization\n\n3 - Columnar Storage & Vectorization\n+ DataFrames often use Columnar formats (Parquet, ORC)\n+ Enables compression and vectorized execution (processing batches of values at once)",
+    "link": "https://www.databricks.com/blog/2016/07/14/a-tale-of-three-apache-spark-apis-rdds-dataframes-and-datasets.html"
+  },
+  {
+    "qid": "8",
+    "category": "Spark",
+    "question": "What is SparkContext?",
+    "quick_answer": "Original entry point to Spark\nRole: connects to the cluster, manages resources, and create RDDs",
+    "short_answer": "Definition: the original entry point into Spark (pre-Spark 2.0)\nRole: connects to the cluster, manages resources, and creates RDDs\nUsage: \nfrom pyspark import SparkContext\nsc = SparkContext(\"local\", \"MyApp\")\nrdd = sc.parallelize([1,2,3,4])\nprint(rdd.map(lambda x: x*2).collect())\nLimitation: works only with RDDs. For SQL/DataFrames, you needed SQLContext or HiveContext",
+    "link": "https://sparkbyexamples.com/spark/spark-sparkcontext/"
+  },
+  {
+    "qid": "9",
+    "category": "Spark",
+    "question": "What is SparkSession?",
+    "quick_answer": "Introduced in Spark 2.0 as the unified entry point\nRole: Combine SparkContext, SQLContext, HiveContext into one object\nAdvantage: seamlessly use RDDs, DataFrames, Datasets and SQL queries at one place",
+    "short_answer": "Definition: Introduced in Spark 2.0 as the unified entry point\nRole: Combines SparkContext, SQLContext and HiveContext into one object\n\nUsage:\n\tfrom pyspark.sql import SparkSession\n\tspark = SparkSession.builder.appName(\"\"MyApp\"\").getOrCreate()\n\t# Access SparkContext through SparkSession\n\tsc = spark.sparkContext\n\t# Create DataFrame\n\tdata = [(\"\"Alice\"\", 34), (\"\"Bob\"\", 45)]\n\tdf = spark.createDataFrame(data, [\"\"Name\"\", \"\"Age\"\"])\n\tdf.show()\nAdvantage: With SparkSession, you can seamlessly use RDDs, DataFrames, Datasets and SQL queries at one place.",
+    "link": "https://sparkbyexamples.com/spark/sparksession-explained-with-examples/"
+  },
+  {
+    "qid": "10",
+    "category": "Spark",
+    "question": "What is Lazy Evaluation?",
+    "quick_answer": "Spark delays execution of transformation until an action is triggered. Lazy evaluation enables Catalyst optimization and efficient DAG execution\nWhy: query optimization, avoids unnecessary computation",
+    "short_answer": "How it works: Transformation (e.g. map, filter, select) are recorded in a DAG\nSpark waits until an action (e.g. collect, count, save) is called.\nAt that point, Spark optimizes the DAG using the Catalyst optimizer and executes only what's needed\nBenefits: Performance optimization (Spark can combine multiple transformations into a single stage), Resource Efficiency (avoids computing intermediate results that aren't used, Fault tolerance (linage allows recomputation if a node fails)\n\nCode Example (PySpark):\n\t# Lazy transformations\n\trdd = spark.sparkContext.parallelize([1, 2, 3, 4, 5])\n\trdd_transformed = rdd.map(lambda x: x * 2).filter(lambda x: x > 5)\n\n\t# Nothing executed yet\n\tprint(\"\"No computation until an action is called\"\")\n\n\t# Action triggers execution\n\tprint(rdd_transformed.collect())\n\t# Output: [6, 8, 10]\n\nKey Points:\n+ Transformations are lazy; actions are eager\n+ Lazy evaluation enables Catalyst optimization and efficient DAG execution",
+    "link": "https://data-flair.training/blogs/apache-spark-lazy-evaluation/"
+  }
+]
