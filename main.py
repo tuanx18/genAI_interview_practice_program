@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import messagebox, Toplevel, Canvas, Scrollbar, Frame, Label, Button, simpledialog
+from tkinter import messagebox, Toplevel, Canvas, Scrollbar, Frame, Label, Button, simpledialog, ttk
 import os
 import random
 import time
@@ -43,6 +43,18 @@ root = tk.Tk()
 root.title("Interview Trainer - AI Chatbot")
 root.geometry("880x680")
 root.configure(bg="#f5f5f5")
+
+# ==================== PICK QUESTION BUTTON (top-right) ====================
+top_bar = Frame(root, bg="#f5f5f5")
+top_bar.pack(fill="x", pady=(10, 0), padx=25)
+
+Button(top_bar, 
+       text="Pick a Question", 
+       command=lambda: pick_question(),
+       bg="#9b59b6", 
+       fg="white", 
+       font=("Segoe UI", 10, "bold"),
+       width=18).pack(side="right")
 
 # UI elements
 Label(root, text="Current Question:", bg="#f5f5f5", font=("Segoe UI", 12, "bold")).pack(pady=10)
@@ -292,6 +304,77 @@ def retry_last(question, user_answer):
 
     except Exception as e:
         messagebox.showerror("Retry Error", str(e))
+
+def pick_question():
+    # Filter only questions from currently selected categories
+    pool = [q for q in questions if q["category"] in selected_categories]
+    if not pool:
+        messagebox.showinfo("No questions", "No questions available in your selected categories.")
+        return
+
+    # Sort by qid for nicer order
+    pool.sort(key=lambda q: q["qid"])
+
+    win = Toplevel(root)
+    win.title("Pick a Question")
+    win.geometry("920x520")
+    win.configure(bg="#f5f5f5")
+    win.resizable(True, True)
+
+    Label(win, 
+          text="Choose any question from your selected categories:",
+          bg="#f5f5f5", 
+          font=("Segoe UI", 12, "bold")).pack(pady=12)
+
+    # Combobox with nice display
+    combo_var = tk.StringVar()
+    combo = ttk.Combobox(win, 
+                         textvariable=combo_var, 
+                         state="readonly", 
+                         font=("Segoe UI", 10),
+                         width=110)
+    
+    display_list = []
+    qid_to_question = {}
+    for q in pool:
+        short_text = q["question"][:115] + ("..." if len(q["question"]) > 115 else "")
+        display = f"Q{q['qid']} — {q['category']}: {short_text}"
+        display_list.append(display)
+        qid_to_question[display] = q
+
+    combo['values'] = display_list
+    combo.pack(padx=25, pady=8, fill="x")
+
+    # Load selected question
+    def load_selected():
+        selected_display = combo_var.get()
+        if not selected_display:
+            messagebox.showwarning("Select", "Please choose a question.")
+            return
+
+        selected_q = qid_to_question[selected_display]
+
+        # Replace current question
+        global current_question, start_time
+        current_question = selected_q
+
+        question_label.config(text=current_question["question"])
+        category_label.config(text=f"Category: {current_question['category']}")
+        answer_text.delete("1.0", tk.END)
+        start_time = time.time()
+        update_timer()
+
+        win.destroy()
+
+    Button(win, 
+           text="✅ Load This Question", 
+           command=load_selected,
+           bg="#27ae60", 
+           fg="white", 
+           font=("Segoe UI", 11, "bold")).pack(pady=20)
+
+    # Bonus: Press Enter in combobox also loads
+    combo.bind("<Return>", lambda e: load_selected())
 
 def open_categories():
     top = Toplevel(root)
