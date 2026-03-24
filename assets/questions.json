@@ -94,5 +94,45 @@
     "quick_answer": "- Design a clean hierarchy (metastore / catalog / schema / table) that maps to domains or departments\n- Enforce least-privilege permissions through UC's GRANT\n- Apply row/col masking for sensitive PII\n- Use classification tags and audit logs to track data usage\n- Enfore schema evolution & enforcement on Delta Tables",
     "short_answer": "In Databricks, the best governance practices revolve around Unity Catalog. First, design a clean hierarchy that manps to domains or departments. Enforce least-previlege permissions through UC's GRANT model and apply row/column masking policies for sensitive PII. Use classification tags and audit logs to track data usage. Keep data in external locations or volumes with IAM-bound access, ensuring all data access is mediated by UC. Enforce schema evolution and schema enforcement on Delta Tables. Enable column-level linage for impact analysis and compliance. Finally, centralize credential management with UC, service principals, and secret scopes to avoid credential sprawl.",
     "link": "https://www.databricks.com/discover/data-governance/strategy"
+  },
+  {
+    "qid": "13",
+    "category": "Spark",
+    "question": "What is the difference between Narrow and Wide transformations?",
+    "quick_answer": "Narrow = fast, local, no network overhead\nWide = slower, involve shuffles, can cause bottlenecks",
+    "short_answer": "Narrow Transformations: \n- Fast, local, no network overhead\n- High parallelism, as operations can be performed independently on each partition\n- No data shuffling required\n- Example: map, filter, flatMap\n- Minimal performance impact\n- Preferred for optimizing performance and resource utilization\n\nWide transformations: \n- slower, involve shuffles, can cause bottlenecks\n- Multiple child partitions depend on the same parent partition or data needs to be shuffled\n- Lower parallelism due to data shuffling and dependencies between partitions\n- Data shuffling across the network may be required\n- groupByKey, reduceByKey, join\n- Potential performance bottlenecks due to network I/O and data skew\n- Should be minimized; optimize by partitioning, caching, and broadcasting\n\nOptimization tip: prefer reduceByKey over groupByKey (less shuffle)",
+    "link": "https://www.geeksforgeeks.org/big-data/wide-and-narrow-dependencies-in-apache-spark/"
+  },
+  {
+    "qid": "14",
+    "category": "Spark",
+    "question": "What is actions and transformations?",
+    "quick_answer": "Transformations = lazy operations that define a computation plan (e.g. select, filter, join)\nActions = trigger execution, return results or write output (e.g. count, collect, write)",
+    "short_answer": "Transformations: create a new DataFrame from an existing one without running the job immediately\nActions: make Spark execute the DAG (that stores all the previous transformations).\n\nExample - Transformations (Lazy Evaluation):\nSpark builds a logical plan\n\tdf2 = df.filter(df.age > 18)  # Transformation\n\tdf3 = df2.select(\"\"name\"\")   # Transformation\n\t→ Nothing runs yet → Spark waits for an action\n\nExample - Actions (Trigger Exectution):\n\tdf3.show()       # Action\n\tdf3.count()      # Action\n\tdf3.write.save(\"\"path\"\")       # Action\n\nWhy Lazy?\n- Enables optimization via Catalyst\n- Enables pipeline execution\n- Avoids unnecessary work",
+    "link": "https://data-flair.training/blogs/spark-rdd-operations-transformations-actions/"
+  },
+  {
+    "qid": "15",
+    "category": "Databricks",
+    "question": "What is Delta Table (delta lake format)?",
+    "quick_answer": "A table stored in Delta Lake Format which is an enhanced version of Parquet that adds ACID transactions, schema enforcement, versioning, and time travel on top of data lakes.\nIt allows reliable data storage on systems like Apache Spark, making data lakes behave more like traditional databases.",
+    "short_answer": "A Delta Table is a table stored using the Delta Lake format. It is built on top of Apache Parquet, but adds extra features that make data lakes reliable and production-ready.\nThink of it as: Parquet + Transaction Log = Delta Table\n\nWhy Delta Tables Exist (Problem It Solves):\nTraditional data lakes using Parquet have problems:\n❌ No transactions\n❌ No rollback\n❌ Schema mismatch risks\n❌ Hard to handle concurrent writes\n❌ No version history\nDelta Tables fix these issues.\n\nKey Features of Delta Tables:\n- ACID Transactions (Atomicity, Consistency, Isolation, Durability)\n- Schema Enforcement (prevents bad data write)\n- Schema Evolution (safely add new columns)\n- Time Travel\n- Upserts (MERGE Support)\n- Performance Optimization (Delta improves speed using: Data Skipping, Z-ordering, File Compaction, Metadata caching)\n\nDelta Table Architecture: Transaction history + Metadata + Schema changes\n\nWhere Delta Tables Are Used:\nVery common in:\n- Data Lakes\n- Data Warehouses\n -ETL Pipelines\n- Streaming Pipelines\n\nUsed with:\n- Apache Spark\n- Databricks\n- Azure Data Lake Storage\n- Amazon S3",
+    "link": "https://docs.databricks.com/aws/en/delta/"
+  },
+  {
+    "qid": "16",
+    "category": "Data Engineering",
+    "question": "What is Parquet Format?",
+    "quick_answer": "Parquet is a columnar storage file format used in big data systems.\n- It stores data by columns instead of rows, making it faster and more efficient for analytics queries and reducing storage size through better compression.\n- It is widely used with Apache Spark, Apache Hive, and Apache Hadoop.",
+    "short_answer": "What is Parquet?\n- Apache Parquet is a columnar file format designed for efficient data storage and fast analytics queries.\n- Free and open source file format.\n- Unlike CSV or JSON, which store data row by row, Parquet stores data column by column.\nThis design makes it ideal for:\n✔ Big data\n✔ Data lakes\n✔ Analytical workloads\n✔ Data warehouses\n\nWhy Column Storage Is Faster? With Parquet, it only reads the required columns (instead of scanning all columns like in Row-based storage)\n\nKey Features of Parquet:\n- Columnar Storage: store data by column\n- Compression (Very Powerful): Parquet compresses data better because: same column = similiar data (benefit: small file size, lower storage cost)\n- Schema Support: Parquet stores ✔ Data types ✔ Column names ✔ Metadata\n- Predicate Pushdown: skips irrelevant data, reads only needed blocks\n\nWhere Parquet Is Used:\nVery widely used in modern data engineering.\nTypical storage:\n+ Amazon S3\n+ Azure Data Lake Storage\n+ Google Cloud Storage\nProcessing engines:\n+ Apache Spark\n+ Apache Hive\n+  Presto",
+    "link": "https://www.databricks.com/blog/what-is-parquet"
+  },
+  {
+    "qid": "17",
+    "category": "Spark",
+    "question": "What is data shuffle?",
+    "quick_answer": "Data shuffle is the process of redistributing data across partitions between executors, usually caused by wide transformations like groupBy, join, or reduceByKey.\nIt is expensive because it involves:\n- Disk I/O\n- Network transfer \n- Serialization overhead",
+    "short_answer": "What is Data Shuffle? In Apache Spark, data shuffle happens when data must move between partitions to perform operations that require data grouping or matching.\nSimple definition: Shuffle = moving data across the cluster so related data ends up in the same partition.\n\nWhen Does Shuffle Happen?\nCommon shuffle operations: groupBy(), reduceByKey(), join(), distinct(), orderBy(), filter(), map()\nRule: Wide transformation → Shuffle\n\nWhat Happens Internally During Shuffle?\nShuffle process:\n1. Write intermediate data to disk\t\t\t\t\tExecutor A → write to disk\n2. Send data across network\t\t\t\t\tExecutor A → send over network\n3. Read data on destination executor\t\t\t\t\tExecutor B → receive\n4. Merge partitions\t\t\t\t\tExecutor B → read from disk\nThat’s why shuffle is slow.\n\nWhy Shuffle Is Expensive?\n- Disk I/O: Intermediate data written to disk, disk is slower than memory\n- Network I/O: Data transferred between nodes, network latency adds overhead.\n- Serialization: Data must be serialized/deserialized, extra CPU cost",
+    "link": "https://spark.apache.org/docs/latest/rdd-programming-guide.html#shuffle-operations"
   }
 ]
