@@ -46,5 +46,53 @@
     "quick_answer": "Spark delays execution of transformation until an action is triggered. Lazy evaluation enables Catalyst optimization and efficient DAG execution\nWhy: query optimization, avoids unnecessary computation",
     "short_answer": "How it works: Transformation (e.g. map, filter, select) are recorded in a DAG\nSpark waits until an action (e.g. collect, count, save) is called.\nAt that point, Spark optimizes the DAG using the Catalyst optimizer and executes only what's needed\nBenefits: Performance optimization (Spark can combine multiple transformations into a single stage), Resource Efficiency (avoids computing intermediate results that aren't used, Fault tolerance (linage allows recomputation if a node fails)\n\nCode Example (PySpark):\n\t# Lazy transformations\n\trdd = spark.sparkContext.parallelize([1, 2, 3, 4, 5])\n\trdd_transformed = rdd.map(lambda x: x * 2).filter(lambda x: x > 5)\n\n\t# Nothing executed yet\n\tprint(\"\"No computation until an action is called\"\")\n\n\t# Action triggers execution\n\tprint(rdd_transformed.collect())\n\t# Output: [6, 8, 10]\n\nKey Points:\n+ Transformations are lazy; actions are eager\n+ Lazy evaluation enables Catalyst optimization and efficient DAG execution",
     "link": "https://data-flair.training/blogs/apache-spark-lazy-evaluation/"
+  },
+  {
+    "qid": "1",
+    "category": "Spark",
+    "question": "Can you give examples of when narrow transformations are used in Spark?",
+    "quick_answer": "Narrow transformations are used when each partition can be processed independently without shuffling data between nodes.\nCommon examples include:\n1. map() — applying transformation to each row\n2. filter() — selecting rows based on condition\n3. withColumn() — adding or modifying columns\n4. select() — choosing specific columns\nThese are efficient because Spark doesn't need to move data across the cluster.",
+    "short_answer": "Narrow transformations are operations where each output partition depends on only one input partition, so Spark can execute them without shuffling data across nodes.\n\nCase 1 — Data Cleaning: When reading raw data and filtering invalid records.\nCode example: df = df.filter(df.age > 0)\nWhy narrow: Each partition filters its own data independently.\n\nCase 2 — Column Transformation: Adding calculated columns.\nCode example: df = df.withColumn(\"salary_usd\", df.salary * 1.1)\nWhy narrow: Each row is processed locally without needing other partitions.\n\nCase 3 — Selecting Columns: Choosing only required columns.\nCode example: df = df.select(\"id\", \"name\", \"salary\")\nWhy narrow: Spark just drops columns locally.\n\nCase 4 — Mapping Data: Applying function to each record.\nCode example: rdd.map(lambda x: x * 2)\nWhy narrow: Each record is transformed independently.\n\nSummary Statement (Strong Interview Ending): Narrow transformations are preferred because they avoid shuffling, making them faster and more memory-efficient, especially when working with large distributed datasets.",
+    "link": "https://bigdataperformance.substack.com/p/understanding-wide-vs-narrow-transformations"
+  },
+  {
+    "qid": "2",
+    "category": "Spark",
+    "question": "What is Narrow Transformations?",
+    "quick_answer": "Each input partition contributes to exactly one output partition. No shufflle required",
+    "short_answer": "Definition: each input partition contributes to exactly one output partition\nNo shuffle required → faster, more efficient\n\nExamples: map(), filter(), union() (when partition aligns)\nExample in PySpark:\n\trdd = spark.sparkContext.parallelize([1, 2, 3, 4, 5])\n\t# Narrow transformation: map\n\tmapped_rdd = rdd.map(lambda x: x * 2)\n\tprint(mapped_rdd.collect())\n\t# Output: [2, 4, 6, 8, 10]\n→ Here, each partition processes its own data without needing to exchange data with others",
+    "link": "https://bigdataperformance.substack.com/p/understanding-wide-vs-narrow-transformations"
+  },
+  {
+    "qid": "3",
+    "category": "Spark",
+    "question": "What is Wide Transformations?",
+    "quick_answer": "Input Partitions may contribute to multiple output partitions\nRequires shuffle → data moved across nodes, more costly",
+    "short_answer": "Definition: Input partitions may contribute to multiple output partitions\nRequires shuffle → data is moved across nodes, more costly\n\nExamples: groupByKey(), reduceByKey(), distinct(), join(), repartition()\nExample in PySpark:\n\tpairs = spark.sparkContext.parallelize([(a, 1), (b, 2), (c, 3)])\n\t# Wide transformation: reduceBykey - requires shuffle\n\treduced = pairs.reduceByKey(lambda x, y: x + y)\n\tprint(reduced.collect())\n\t# Output: [('a', 4), ('b', 2)]\nHere, all values for key \"\"a\"\" must be shuffled to the same partition before aggregation",
+    "link": "https://bigdataperformance.substack.com/p/understanding-wide-vs-narrow-transformations"
+  },
+  {
+    "qid": "4",
+    "category": "Databricks",
+    "question": "What is Serverless Compute in Databricks?",
+    "quick_answer": "Serverless Compute = Databricks completely manages compute infrastructure\n- You do NOT choose: Cluster Size, node type, autoscaling settings, driver/executor, init scripts, VMs or spot nodes.\n- You only run workloads; Databricks handles everything.",
+    "short_answer": "Serverless Compute in Databricks is a fully managed execution environment where Databricks owns and operates the compute infrastructure. You don't provision clusters, nodes, instance types, or autoscaling - Databricks provides instant-start compute with strong security isolation. This powers Serverless SQL Warehouse, Delta Live Tables, and model Serving\n\nThe main differences from regular clusters are:\n1 - Startup time: Serverless is near-instant, clusters and take minutes\n2 - Scaling: Serverless scales elastically with no user-defined limits; cluster have fixed auto-scaling ranges\n3 - Management: Serverless needs no cluster management\n4 - Security: Serverless provides stronger isolation with Databricks-managed VMs\n5 - Cost model: Pay strictly for compute time usedl no idle cluster charges",
+    "link": "https://www.databricks.com/blog/what-is-serverless-computing"
+  },
+  {
+    "qid": "11",
+    "category": "Spark",
+    "question": "How to Optimize in SparkSQL?",
+    "quick_answer": "- Predicate Pushdown\n- Column Pruning\n- Broadcast hints\n- Avoid SELECT *\n- Use Partition Pruning\n- Use Delta Lake features (Z-Order, OPTIMIZE)\n- Keep statistics updated for CBO",
+    "short_answer": "Spark SQL optimization is about giving the Catalyst Optimizer better information and storing data in ways that allow Spark to skip reading unnecessary files.\n\n1 - Avoid SELECT * \nIt disables column pruning. Only select the necessary columns\n\n2 - Filter Early\nSpark pushes the filter into the file reader.\nSELECT * FROM sales WHERE event_date = '2024-01-01';\nPushdown works on Parquet & Delta\n\n3 - Use Broadcast Hints\nSELECT BROADCAST(dim_customer) FROM fact_sales f JOIN dim_customer d ON f.id = d.cid\n\n4 - Partition Pruning\nIf table is partitioned: SELECT * FROM table WHERE dt = '2024-01-01'\nSpark reads only \"\"dt=2024-01-01\"\", not entire table\n\n5 - Use Correct JOIN types\nIf keys are distinct, use SEMI join:\nSELECT * FROM orders WHERE customer_id IN (SELECT customer_id FROM vip_customers)\nSpark rewrites as SEMI join (much cheaper)\n\n6 - Maintain Statistics for Cost-based Optimizer\nANALYZE TABLE sales COMPUTE STATISTICS;\nBetter plan → fewer shuffles\n\n7 - Use Window Functions Wisely\nToo many window clauses → multiple Shuffles\nGroup Windows where possible",
+    "link": "https://data-flair.training/blogs/spark-sql-optimization/"
+  },
+  {
+    "qid": "12",
+    "category": "Databricks",
+    "question": "What are some Data Governance best practices in Databricks?",
+    "quick_answer": "- Design a clean hierarchy (metastore / catalog / schema / table) that maps to domains or departments\n- Enforce least-privilege permissions through UC's GRANT\n- Apply row/col masking for sensitive PII\n- Use classification tags and audit logs to track data usage\n- Enfore schema evolution & enforcement on Delta Tables",
+    "short_answer": "In Databricks, the best governance practices revolve around Unity Catalog. First, design a clean hierarchy that manps to domains or departments. Enforce least-previlege permissions through UC's GRANT model and apply row/column masking policies for sensitive PII. Use classification tags and audit logs to track data usage. Keep data in external locations or volumes with IAM-bound access, ensuring all data access is mediated by UC. Enforce schema evolution and schema enforcement on Delta Tables. Enable column-level linage for impact analysis and compliance. Finally, centralize credential management with UC, service principals, and secret scopes to avoid credential sprawl.",
+    "link": "https://www.databricks.com/discover/data-governance/strategy"
   }
 ]

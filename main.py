@@ -376,18 +376,11 @@ def submit_answer():
 
         ideal = current_question.get("short_answer") or current_question.get("Short Answer", "")
 
-        # ==================== LOAD HISTORY ====================
+        # ==================== ALWAYS APPEND NEW RECORD ====================
         history = []
         if os.path.exists(HISTORY_PATH):
             with open(HISTORY_PATH, "r", encoding="utf-8") as f:
                 history = [json.loads(line) for line in f]
-
-        # ==================== CHECK SAME QID ====================
-        existing_index = None
-        for i, h in enumerate(history):
-            if h["question_id"] == current_question["qid"]:
-                existing_index = i
-                break
 
         new_record = {
             "id": len(history) + 1,
@@ -399,26 +392,14 @@ def submit_answer():
             "generated_comment": comment,
             "ideal_answer": ideal
         }
-
-        # ==================== SAVE LOGIC ====================
-        if existing_index is not None:
-            replace = messagebox.askyesno(
-                "Retry detected",
-                "You already answered this question.\nDo you want to REPLACE the old attempt?"
-            )
-            if replace:
-                history[existing_index] = new_record
-            else:
-                history.append(new_record)
-        else:
-            history.append(new_record)
+        history.append(new_record)   # ← always store, never replace
 
         with open(HISTORY_PATH, "w", encoding="utf-8") as f:
             for h in history:
                 json.dump(h, f, ensure_ascii=False)
                 f.write("\n")
 
-        # ==================== FEEDBACK WINDOW ====================
+        # ==================== FEEDBACK WINDOW WITH IMPROVED BOLD HEADERS ====================
         fw = Toplevel(root)
         fw.title("AI Feedback")
         fw.geometry("860x640")
@@ -434,15 +415,54 @@ def submit_answer():
               font=("Segoe UI", 20, "bold"),
               fg=color, bg="#fdfdfd").pack(pady=10)
 
-        # ==================== COMMENT ====================
-        text_box = tk.Text(fw, wrap="word", font=("Segoe UI", 11))
-        text_box.insert("1.0", comment + "\n\n--- Reference ---\n" + ideal)
+        # === Rich text box ===
+        text_box = tk.Text(fw, wrap="word", font=("Segoe UI", 11), bg="#fdfdfd", padx=10, pady=10)
+        text_box.pack(fill="both", expand=True)
+
+        # Tags
+        text_box.tag_configure("bold", font=("Segoe UI", 11, "bold"))
+        text_box.tag_configure("ref_header", 
+                               font=("Segoe UI", 11, "bold"), 
+                               foreground="#2980b9")   # nice blueish color
+
+        # Insert full text with new reference header
+        display_text = comment + "\n\n--- Reference / Ideal short answer ---\n" + ideal
+        text_box.insert("1.0", display_text)
+
+        # 1. Apply bold to the new reference header
+        pos = text_box.search("--- Reference / Ideal short answer ---", "1.0", nocase=True, stopindex="end")
+        if pos:
+            line_start = text_box.index(f"{pos} linestart")
+            line_end   = text_box.index(f"{pos} lineend + 1 char")
+            text_box.tag_add("ref_header", line_start, line_end)
+
+        # Robust bolding: find any of the keywords (case-insensitive) and bold the whole line
+        keywords = [
+            "what i did good",
+            "what you did good",
+            "how can i",
+            "bonus points if",
+            "on my answer"
+        ]
+
+        for kw in keywords:
+            start_idx = "1.0"
+            while True:
+                pos = text_box.search(kw, start_idx, nocase=True, stopindex="end")
+                if not pos:
+                    break
+                # Bold the entire line that contains the keyword
+                line_start = text_box.index(f"{pos} linestart")
+                line_end = text_box.index(f"{pos} lineend + 1 char")
+                text_box.tag_add("bold", line_start, line_end)
+                start_idx = line_end   # continue after this line
+
         text_box.config(state="disabled")
-        text_box.pack(fill="both", expand=True, padx=10, pady=10)
 
         # ==================== BUTTONS ====================
         def retry_same():
             fw.destroy()
+            # Window closes → you can edit answer and submit again (new record will be saved)
 
         def next_q():
             fw.destroy()
@@ -451,11 +471,11 @@ def submit_answer():
 
         Button(fw, text="Retry This Question",
                command=retry_same,
-               bg="#f39c12", fg="white").pack(side="left", padx=10, pady=10)
+               bg="#f39c12", fg="white").pack(side="left", padx=15, pady=12)
 
         Button(fw, text="Next Question",
                command=next_q,
-               bg="#27ae60", fg="white").pack(side="right", padx=10, pady=10)
+               bg="#27ae60", fg="white").pack(side="right", padx=15, pady=12)
 
     except Exception as e:
         messagebox.showerror("Error", str(e))
