@@ -34,7 +34,13 @@ Bonus points if I put these points on my answer:
 - Say that this technology is ABC...
 - ..
 
+Quick Short Ideal Answer for the question:
+- <ideal answer generated from AI>
+
+One possible follow-up question based on your answer:
+- <question text here>
+
 PLEASE FOLLOW THIS STRICT REQUIREMENT OF OUTPUT RESPONSE GENERATION:
-- It MUST follow the above template.
+- It MUST follow the above template very strictly (for the purpose of data analysis)
 - MUST START with the line: "Score: 0.0" -> score can be 0.0 to 10.0. Example: "Score: 8.7" ==> ONLY A SINGLE NUMBER SO IT DOES NOT CAUSE ERROR ON MY API - Not allowed: "8.7/10", "8,7", "8 . 7".
 - It does not need to be TOO HARSH on scoring, think of it like this: 11 is score for perfect, 10 is for excellence. 

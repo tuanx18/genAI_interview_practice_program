@@ -1,5 +1,37 @@
 [
   {
+    "qid": "1",
+    "category": "Spark",
+    "question": "Can you give examples of when narrow transformations are used in Spark?",
+    "quick_answer": "Narrow transformations are used when each partition can be processed independently without shuffling data between nodes.\nCommon examples include:\n1. map() — applying transformation to each row\n2. filter() — selecting rows based on condition\n3. withColumn() — adding or modifying columns\n4. select() — choosing specific columns\nThese are efficient because Spark doesn't need to move data across the cluster.",
+    "short_answer": "Narrow transformations are operations where each output partition depends on only one input partition, so Spark can execute them without shuffling data across nodes.\n\nCase 1 — Data Cleaning: When reading raw data and filtering invalid records.\nCode example: df = df.filter(df.age > 0)\nWhy narrow: Each partition filters its own data independently.\n\nCase 2 — Column Transformation: Adding calculated columns.\nCode example: df = df.withColumn(\"salary_usd\", df.salary * 1.1)\nWhy narrow: Each row is processed locally without needing other partitions.\n\nCase 3 — Selecting Columns: Choosing only required columns.\nCode example: df = df.select(\"id\", \"name\", \"salary\")\nWhy narrow: Spark just drops columns locally.\n\nCase 4 — Mapping Data: Applying function to each record.\nCode example: rdd.map(lambda x: x * 2)\nWhy narrow: Each record is transformed independently.\n\nSummary Statement (Strong Interview Ending): Narrow transformations are preferred because they avoid shuffling, making them faster and more memory-efficient, especially when working with large distributed datasets.",
+    "link": "https://bigdataperformance.substack.com/p/understanding-wide-vs-narrow-transformations"
+  },
+  {
+    "qid": "2",
+    "category": "Spark",
+    "question": "What is Narrow Transformations?",
+    "quick_answer": "Each input partition contributes to exactly one output partition. No shufflle required",
+    "short_answer": "Definition: each input partition contributes to exactly one output partition\nNo shuffle required → faster, more efficient\n\nExamples: map(), filter(), union() (when partition aligns)\nExample in PySpark:\n\trdd = spark.sparkContext.parallelize([1, 2, 3, 4, 5])\n\t# Narrow transformation: map\n\tmapped_rdd = rdd.map(lambda x: x * 2)\n\tprint(mapped_rdd.collect())\n\t# Output: [2, 4, 6, 8, 10]\n→ Here, each partition processes its own data without needing to exchange data with others",
+    "link": "https://bigdataperformance.substack.com/p/understanding-wide-vs-narrow-transformations"
+  },
+  {
+    "qid": "3",
+    "category": "Spark",
+    "question": "What is Wide Transformations?",
+    "quick_answer": "Input Partitions may contribute to multiple output partitions\nRequires shuffle → data moved across nodes, more costly",
+    "short_answer": "Definition: Input partitions may contribute to multiple output partitions\nRequires shuffle → data is moved across nodes, more costly\n\nExamples: groupByKey(), reduceByKey(), distinct(), join(), repartition()\nExample in PySpark:\n\tpairs = spark.sparkContext.parallelize([(a, 1), (b, 2), (c, 3)])\n\t# Wide transformation: reduceBykey - requires shuffle\n\treduced = pairs.reduceByKey(lambda x, y: x + y)\n\tprint(reduced.collect())\n\t# Output: [('a', 4), ('b', 2)]\nHere, all values for key \"\"a\"\" must be shuffled to the same partition before aggregation",
+    "link": "https://bigdataperformance.substack.com/p/understanding-wide-vs-narrow-transformations"
+  },
+  {
+    "qid": "4",
+    "category": "Databricks",
+    "question": "What is Serverless Compute in Databricks?",
+    "quick_answer": "Serverless Compute = Databricks completely manages compute infrastructure\n- You do NOT choose: Cluster Size, node type, autoscaling settings, driver/executor, init scripts, VMs or spot nodes.\n- You only run workloads; Databricks handles everything.",
+    "short_answer": "Serverless Compute in Databricks is a fully managed execution environment where Databricks owns and operates the compute infrastructure. You don't provision clusters, nodes, instance types, or autoscaling - Databricks provides instant-start compute with strong security isolation. This powers Serverless SQL Warehouse, Delta Live Tables, and model Serving\n\nThe main differences from regular clusters are:\n1 - Startup time: Serverless is near-instant, clusters and take minutes\n2 - Scaling: Serverless scales elastically with no user-defined limits; cluster have fixed auto-scaling ranges\n3 - Management: Serverless needs no cluster management\n4 - Security: Serverless provides stronger isolation with Databricks-managed VMs\n5 - Cost model: Pay strictly for compute time usedl no idle cluster charges",
+    "link": "https://www.databricks.com/blog/what-is-serverless-computing"
+  },
+  {
     "qid": "5",
     "category": "Spark",
     "question": "What is the High-level Architecture of Spark?",
@@ -46,38 +78,6 @@
     "quick_answer": "Spark delays execution of transformation until an action is triggered. Lazy evaluation enables Catalyst optimization and efficient DAG execution\nWhy: query optimization, avoids unnecessary computation",
     "short_answer": "How it works: Transformation (e.g. map, filter, select) are recorded in a DAG\nSpark waits until an action (e.g. collect, count, save) is called.\nAt that point, Spark optimizes the DAG using the Catalyst optimizer and executes only what's needed\nBenefits: Performance optimization (Spark can combine multiple transformations into a single stage), Resource Efficiency (avoids computing intermediate results that aren't used, Fault tolerance (linage allows recomputation if a node fails)\n\nCode Example (PySpark):\n\t# Lazy transformations\n\trdd = spark.sparkContext.parallelize([1, 2, 3, 4, 5])\n\trdd_transformed = rdd.map(lambda x: x * 2).filter(lambda x: x > 5)\n\n\t# Nothing executed yet\n\tprint(\"\"No computation until an action is called\"\")\n\n\t# Action triggers execution\n\tprint(rdd_transformed.collect())\n\t# Output: [6, 8, 10]\n\nKey Points:\n+ Transformations are lazy; actions are eager\n+ Lazy evaluation enables Catalyst optimization and efficient DAG execution",
     "link": "https://data-flair.training/blogs/apache-spark-lazy-evaluation/"
-  },
-  {
-    "qid": "1",
-    "category": "Spark",
-    "question": "Can you give examples of when narrow transformations are used in Spark?",
-    "quick_answer": "Narrow transformations are used when each partition can be processed independently without shuffling data between nodes.\nCommon examples include:\n1. map() — applying transformation to each row\n2. filter() — selecting rows based on condition\n3. withColumn() — adding or modifying columns\n4. select() — choosing specific columns\nThese are efficient because Spark doesn't need to move data across the cluster.",
-    "short_answer": "Narrow transformations are operations where each output partition depends on only one input partition, so Spark can execute them without shuffling data across nodes.\n\nCase 1 — Data Cleaning: When reading raw data and filtering invalid records.\nCode example: df = df.filter(df.age > 0)\nWhy narrow: Each partition filters its own data independently.\n\nCase 2 — Column Transformation: Adding calculated columns.\nCode example: df = df.withColumn(\"salary_usd\", df.salary * 1.1)\nWhy narrow: Each row is processed locally without needing other partitions.\n\nCase 3 — Selecting Columns: Choosing only required columns.\nCode example: df = df.select(\"id\", \"name\", \"salary\")\nWhy narrow: Spark just drops columns locally.\n\nCase 4 — Mapping Data: Applying function to each record.\nCode example: rdd.map(lambda x: x * 2)\nWhy narrow: Each record is transformed independently.\n\nSummary Statement (Strong Interview Ending): Narrow transformations are preferred because they avoid shuffling, making them faster and more memory-efficient, especially when working with large distributed datasets.",
-    "link": "https://bigdataperformance.substack.com/p/understanding-wide-vs-narrow-transformations"
-  },
-  {
-    "qid": "2",
-    "category": "Spark",
-    "question": "What is Narrow Transformations?",
-    "quick_answer": "Each input partition contributes to exactly one output partition. No shufflle required",
-    "short_answer": "Definition: each input partition contributes to exactly one output partition\nNo shuffle required → faster, more efficient\n\nExamples: map(), filter(), union() (when partition aligns)\nExample in PySpark:\n\trdd = spark.sparkContext.parallelize([1, 2, 3, 4, 5])\n\t# Narrow transformation: map\n\tmapped_rdd = rdd.map(lambda x: x * 2)\n\tprint(mapped_rdd.collect())\n\t# Output: [2, 4, 6, 8, 10]\n→ Here, each partition processes its own data without needing to exchange data with others",
-    "link": "https://bigdataperformance.substack.com/p/understanding-wide-vs-narrow-transformations"
-  },
-  {
-    "qid": "3",
-    "category": "Spark",
-    "question": "What is Wide Transformations?",
-    "quick_answer": "Input Partitions may contribute to multiple output partitions\nRequires shuffle → data moved across nodes, more costly",
-    "short_answer": "Definition: Input partitions may contribute to multiple output partitions\nRequires shuffle → data is moved across nodes, more costly\n\nExamples: groupByKey(), reduceByKey(), distinct(), join(), repartition()\nExample in PySpark:\n\tpairs = spark.sparkContext.parallelize([(a, 1), (b, 2), (c, 3)])\n\t# Wide transformation: reduceBykey - requires shuffle\n\treduced = pairs.reduceByKey(lambda x, y: x + y)\n\tprint(reduced.collect())\n\t# Output: [('a', 4), ('b', 2)]\nHere, all values for key \"\"a\"\" must be shuffled to the same partition before aggregation",
-    "link": "https://bigdataperformance.substack.com/p/understanding-wide-vs-narrow-transformations"
-  },
-  {
-    "qid": "4",
-    "category": "Databricks",
-    "question": "What is Serverless Compute in Databricks?",
-    "quick_answer": "Serverless Compute = Databricks completely manages compute infrastructure\n- You do NOT choose: Cluster Size, node type, autoscaling settings, driver/executor, init scripts, VMs or spot nodes.\n- You only run workloads; Databricks handles everything.",
-    "short_answer": "Serverless Compute in Databricks is a fully managed execution environment where Databricks owns and operates the compute infrastructure. You don't provision clusters, nodes, instance types, or autoscaling - Databricks provides instant-start compute with strong security isolation. This powers Serverless SQL Warehouse, Delta Live Tables, and model Serving\n\nThe main differences from regular clusters are:\n1 - Startup time: Serverless is near-instant, clusters and take minutes\n2 - Scaling: Serverless scales elastically with no user-defined limits; cluster have fixed auto-scaling ranges\n3 - Management: Serverless needs no cluster management\n4 - Security: Serverless provides stronger isolation with Databricks-managed VMs\n5 - Cost model: Pay strictly for compute time usedl no idle cluster charges",
-    "link": "https://www.databricks.com/blog/what-is-serverless-computing"
   },
   {
     "qid": "11",
@@ -134,5 +134,149 @@
     "quick_answer": "Data shuffle is the process of redistributing data across partitions between executors, usually caused by wide transformations like groupBy, join, or reduceByKey.\nIt is expensive because it involves:\n- Disk I/O\n- Network transfer \n- Serialization overhead",
     "short_answer": "What is Data Shuffle? In Apache Spark, data shuffle happens when data must move between partitions to perform operations that require data grouping or matching.\nSimple definition: Shuffle = moving data across the cluster so related data ends up in the same partition.\n\nWhen Does Shuffle Happen?\nCommon shuffle operations: groupBy(), reduceByKey(), join(), distinct(), orderBy(), filter(), map()\nRule: Wide transformation → Shuffle\n\nWhat Happens Internally During Shuffle?\nShuffle process:\n1. Write intermediate data to disk\t\t\t\t\tExecutor A → write to disk\n2. Send data across network\t\t\t\t\tExecutor A → send over network\n3. Read data on destination executor\t\t\t\t\tExecutor B → receive\n4. Merge partitions\t\t\t\t\tExecutor B → read from disk\nThat’s why shuffle is slow.\n\nWhy Shuffle Is Expensive?\n- Disk I/O: Intermediate data written to disk, disk is slower than memory\n- Network I/O: Data transferred between nodes, network latency adds overhead.\n- Serialization: Data must be serialized/deserialized, extra CPU cost",
     "link": "https://spark.apache.org/docs/latest/rdd-programming-guide.html#shuffle-operations"
+  },
+  {
+    "qid": "18",
+    "category": "Spark",
+    "question": "What is the difference between Physical Plan and Logical Plan?",
+    "quick_answer": "Spark uses logical and physical plans to optimize and execute data transformations.\nLogical plan = defines what data operations to perform (e.g. filter, join) without considering execution details\nPhysical Plan = defines how to execute those operations on a cluster (e.g. BroadcastHashJoin, ShuffleHashJoin)\n→ These are part of the Catalyst optimizer inside the Spark SQL engine. After writing DataFrame/SparkSQL code, Spark converts it to a logical plan, optimizes it, generates a physical plan and finally translates that into a DAG of RDD operations that the scheduler executes on worker node",
+    "short_answer": "Spark SQL uses logical plan and physical plans to optimize and execute data transformations. The logical plan defines what data operations to perform (e.g. filter, join) without considering execution details, why the Physical Plan defines how to execite those operations on a cluster (e.g. BroadcastHashJoin, ShuffleHashJoin)\n\nKey difference and Stages:\n\n1 - Logical Plan (What to do):\n+ Unresolved Logical plan: Spark creates this from user code but doesn't yet know if columns or tables exist\n+ Analyzed Logical Plan: The Catalyst Optimizer resolves column names, data types, and table references using the Catalog\n+ Optimized Logical Plan: Applies optimization rules like predicate shutdown (filtering early) and project pruning (removing unnecessary columns) to improve efficiency\n\n2 - Physical Plan (How to do it):\nPhysical Planning: Spark takes the optimized logical plan and generates multiple physical strategies, choosing the most efficient one based on cost-based optimization\nExecution: Details specific operators, such as how to join tables (e.g. SortMergeJoin vs BroadcastHashJoin) or read data, how to distribute tasks across nodes.",
+    "link": "https://www.linkedin.com/pulse/apache-sparks-logical-physical-plans-using-explain-method-akruvala/"
+  },
+  {
+    "qid": "19",
+    "category": "Spark",
+    "question": "Explain the Spark SQL Execution Pipeline.",
+    "quick_answer": "1 - Parsing (to Unresolved Logical Plan)\n2 - Analysis (produces an Analyzed Logical Plan)\n3 - Logical Optimization (to Optimized Logical Plan)\n4 - Physical Planning (to Physical Plans)\n5 - Execution",
+    "short_answer": "The Spark SQL Execution Pipeline is the sequence of steps Spark follows to convert a SQL/DataFrame query into executable tasks, including parsing, logical planning, optimization, physical planning, and execution.\n\n1 -  Parsing Phase (SQL → Logical Plan)\n-> Checks SQL syntax\n-> Converts query into an Unresolved Logical Plan\n\n2 - Analysis Phase (Resolve References)\n-> Validates table existence\n-> Validates column names\n-> Assigns data types\n-> Resolves functions\nThis creates: Analyzed Logical Plan\n\n3 - Logical Optimization Phase - Spark improves performance without changing query meaning \nThis is done by the Catalyst Optimizer.\nCommon optimizations: Predicate Pushdown, Column Pruning, Constant Folding\nOutput: Optimized Logical Plan\n\n4 - Physical Planning Phase - Spark decides how to execute operations.\nIt generates: Multiple possible Physical Plans\nThen chooses the best one using cost estimation.\nKey decisions include:\n- Join strategy: Broadcast Hash Join, Sort Merge Join, Shuffle Hash Join\n- Partitioning method\n- Shuffle strategy\n\n5 - Execution Phase\nSpark now:\n-> Converts Physical Plan into Tasks\n-> Creates DAG (Directed Acyclic Graph)\n-> Sends tasks to Executors\n-> Processes data in parallel\nThis stage involves:\n-> Task scheduling\n-> Shuffle operations\n-> Memory management\n-> Disk I/O",
+    "link": "https://sparkbyexamples.com/spark/spark-execution-plan/"
+  },
+  {
+    "qid": "20",
+    "category": "Spark",
+    "question": "How to Optimize in PySpark?",
+    "quick_answer": "Core PySpark Optimization Techniques:\n- Use column pruning\n- Apply filter early (predicate pushdown)\n- Choose correct join strategy\n- Use broadcast joins for small tables\n- Avoid unnecessary shuffle operations\n- Optimize partitioning\n- Use cache/persist carefully\n- Use efficient file formats (Parquet/Delta)\n- Avoid collect() on large datasets\n- Monitor using Spark UI",
+    "short_answer": "Core PySpark Optimization Techniques:\n- Avoid unnecessary shuffle operations (MOST IMPORTANT)\n>> This is the most expensive operation in Spark, it happens during groupBy, join, distinct, orderBy\n- Use column pruning\n- Apply filter early (predicate pushdown)\n- Choose correct join strategy\n- Use broadcast joins for small tables (Very important)\n- Optimize partitioning\n- Use cache/persist carefully\n- Use efficient file formats (Parquet/Delta)\n- Avoid collect() on large datasets\n- Monitor using Spark UI",
+    "link": "https://spark.apache.org/docs/latest/sql-performance-tuning.html"
+  },
+  {
+    "qid": "21",
+    "category": "Spark",
+    "question": "What is broadcast join in Spark?",
+    "quick_answer": "Broadcast join: a join strategy where Spark copies (broadcasts) a small dataframe to every executor node so that the join can be done locally, avoiding any shuffle.",
+    "short_answer": "A broadcast join is a join strategy where Spark copies (broadcasts) a small DataFrame to every executor node so that the join can be done locally (within its node), avoiding any shuffle\nBecause Shuffle is EXPENSIVE\nBroadcast = cheap (when data is small)\n\nWhen you broadcast a small table, Spark avoids:\n+ Shuffling big data across the network\n+ Sorting\n+ Exchange nodes\n+ Large memory overhead\n\nWhen to use Broadcast Join? Use it when one DataFrame is very small relative to the other",
+    "link": "https://sparkbyexamples.com/pyspark/pyspark-broadcast-join-with-example/"
+  },
+  {
+    "qid": "22",
+    "category": "Databricks",
+    "question": "How to Optimize in Databricks?",
+    "quick_answer": "Core Databricks Optimization Techniques:\n- Use OPTIMIZE to compact small files\n- Use Z-ORDER to speed up filtering\n- Use partitioning wisely\n- Use Delta Lake format instead of CSV/JSON\n- Enable Auto Optimize and Auto Compaction\n- Use broadcast joins for small tables\n- Cache frequently used data\n- Tune cluster size and worker nodes\n- Use Adaptive Query Execution (AQE)\n- Monitor using Spark UI & Databricks UI",
+    "short_answer": "Databricks optimization includes Delta Lake optimization commands, advanced Photon execution engine, file compaction, Z-order indexing, caching, and better runtime features like AQE and Auto-Optimize.\n\n1 - OPTIMIZE + Z-ORDER (Databricks Exclusive)\n\tOPTIMIZE sales\n\tZORDER BY (customer_id, event_date)\nBenefits: clusters data on key columns, massive speedup for queries with filters, reduces shuffle because Spark reads fewer files\n\n2 - Use Auto-Optimize and Auto-Compact\nAutomatically merges small files → reduces overhead\n\n3 - Use the Photon Engine\nPhoton = C++ vectorized engine, 3-5x faster, better joins, aggregations, scans, built for Delta\n\n4 - Use Delta Caching\nStores frequently accessed data in SSD compute nodes\n\tCACHE SELECT * FROM sales;\n\n5 - Enable Adaptive Query Execution (AQE)\nAutomatically: handles skewed joins, coalesce shuffle partitions, chooses broadcast join if possible\n\n6 - Use Delta Live Tables / Lakeflow\nBuilt-in optimization features: Auto-schema inference, Auto-optimization, Auto-compaction, Managed Dependencies\n\n7 - Unity Catatlog Auto-Optimization\nUC tracks table stats = better query planning\n\n8 - Use Partitioning Wisely\nPartition large tables by frequently filtered columns.\nAvoid: High-cardinality columns (like ID)\n\n9 - Use broadcast joins for small tables\n\n10 - Use Delta Lake format instead of CSV/JSON\n\n11 - Tune cluster size and worker nodes\nCluster tuning is critical.\nTune: Number of workers, Memory per worker, Autoscaling\nBest practices: Enable Autoscaling, Use Photon engine (if available), Choose correct instance type",
+    "link": "https://docs.databricks.com/aws/en/lakehouse-architecture/cost-optimization/best-practices"
+  },
+  {
+    "qid": "23",
+    "category": "Google Cloud",
+    "question": "How do you Optimize your GCS + BigQuery in term of Storage and Computation?",
+    "quick_answer": "Optimize GCS + BigQuery by using efficient file formats, partitioning, clustering, lifecycle policies, query pruning, and avoiding unnecessary data scans to reduce storage cost and computation cost.",
+    "short_answer": "Storage Optimization:\n- Use columnar formats (Parquet / Avro)\n- Compress files (Snappy, GZIP)\n- Use partitioned tables\n- Use clustering on frequently filtered columns\n- Apply GCS lifecycle policies\n- Use correct GCS storage classes\n- Set table expiration for temporary data\n- Avoid too many small files\n\nComputation:\n- Use partition pruning\n- Use clustering pruning\n- Use materialized views\n- Use approximate functions\n- Cache results when possible\n- Use denormalized schema when needed\n- Optimize joins (reduce shuffle)",
+    "link": "https://docs.cloud.google.com/bigquery/docs/best-practices-performance-overview"
+  },
+  {
+    "qid": "24",
+    "category": "AWS",
+    "question": "Can you name some services on Amazon Web Services? What are their equivalence in GCS?",
+    "quick_answer": "Google Cloud Storage = S3\nBigquery = Redshift / Athena\nPub/Sub = Kinesis\nCloud Functions = Lambda\nComposer = MWAA / Step Functions\nDataflow = EMR (Spark)\nCloud Run = ECS / EKS / Fargat\nIAM = IAM\nDataproc = EMR",
+    "short_answer": "GCS = S3: Object storage (raw/bronze layer)\nBigQuery = Redshift / Athena: Data Warehouse / SQL analytics\nPub/Sub = Kinesis: Streaming ingestion, events, queues\nCloud Functions = Lambda: serverless compute\nComposer (Airflow) = MWAA / Step Functions: Orchestration\nDataflow = EMR (Spark): Batch Processing (Spark, Hive)\nCloud Run = ECS / EKS / Fargate: Container orchestration\nIAM = IAM: identity, roles, permissions\nDataproc = EMR: managed Hadoop/Spark",
+    "link": "https://docs.cloud.google.com/docs/get-started/aws-azure-gcp-service-comparison"
+  },
+  {
+    "qid": "25",
+    "category": "AWS",
+    "question": "What are some AWS services that are used most by Data Engineer?",
+    "quick_answer": "Compute: EC2, Lambda, ECS/EKS/Fargate\nStorage: S3, Glacier\nDE Core: Glue ETL, Glue Data Catalog, EMR, Kinesis, Athena, Redshift\nOrchestration: MWAA, Step Functions\nSecurity: IAM, KMS, VPC",
+    "short_answer": "Compute:\n+ EC2 - virtual machines\n+ Lambda - serverless functions\n+ ECS / EKS / Fargate - containerized workloads\n\nStorage:\n+ S3 - object store (foundation of all data pipelines)\n+ Glacier - cold storage (like Nearline/Coldline)\n\nData Engineering Core:\n+ Glue ETL - serverless Spark\n+ EMR - managed Spark/Hadoop cluster\n+ Kinesis Data Streams - real-time streaming\n+ Kinesis Firehose - streaming (S3 with auto-batching)\n+ Athena - serverless SQL on S3\n+ Redshift - data warehouse\n+ Redshift Spectrum - query S3 directly\n\nOrchestration:\n+ MWAA - Airflow\n+ Step Functions - serverless orchestrator\n\nSecurity:\n+ IAM - roles, policies",
+    "link": "https://www.geeksforgeeks.org/cloud-computing/top-aws-services/"
+  },
+  {
+    "qid": "26",
+    "category": "AWS",
+    "question": "Describe a typical AWS data pipeline",
+    "quick_answer": "1 - Data starts with S3 as landing zone\n2 - Streaming data: Kinesis Firehose → S3\n3 - Batch ingestion: Lamda / Glue jobs\n4 - Query/Analytics: Athena, Redshift Spectrum\n5 - Transformations: Glue ETL jobs\n6 - Aggregated data: loaded to Redshift for BI\n7 - Orchestration: through Airflow (MWAA) or Step Functions",
+    "short_answer": "Dataflow:\n1 - Data starts with S3 as landing zone\n2 - Streaming data: Kinesis Firehose → S3\n3 - Batch ingestion: Lamda / Glue jobs\n4 - Query/Analytics: Athena, Redshift Spectrum\n5 - Transformations: Glue ETL jobs\n6 - Aggregated data: loaded to Redshift for BI\n7 - Orchestration: through Airflow (MWAA) or Step Functions\n\nDetailed Explanation:\nA standard AWS data pipelines starts with S3 as the landing zone.\nFor streaming data we use Kinesis Firehose → S3, and for batch ingestion we use Lambda or Glue Jobs\nMetadata is stored in Glue Data Catalog so Athena, EMR, and Redshift Spectrum can query data\nTransformation is done with Glue ETL jobs or EMR Spark Clusters\nFinal transformed Gold Data is loaded into Redshift for BI, or kept in S3 for Athena queries\nOrchestration is managed through Airflow (MWAA) or Step Functions",
+    "link": "https://www.geeksforgeeks.org/cloud-computing/top-aws-services/"
+  },
+  {
+    "qid": "27",
+    "category": "Data Engineering",
+    "question": "What is the difference between Data Lake, Data Warehouse and Data LakeHouse?",
+    "quick_answer": "Delta Lake = store raw, semi-structured, unstructured data cheaply (S3/GCS); schema-on-read, flexible\nData Warehouse = structured, optimized for analytics (Redshift/BigQuery/Snowflake); schema-on-write; ACID\nData Lakehouse = combines both; cheap storage + ACID + BI performance + unified governacne (Delta Lake)",
+    "short_answer": "1 - Data Lake\nExample: GCS, S3, Azure Data Lake\nCharacteristics: stores raw data in file formats (Parquet, JSON, Arvo), cheap, scalable storage, schema-on-read, no ACID transactions, harder governance, great for ML, streaming, ingestion\n\n2 - Data Warehouse\nExample: BigQuery, Redshift, Snowflake\nCharacteristics: Fully structured tables, schema-on-write, ACID, strong consistency, optimized for analytics (columnar, vectorized execution), compute is expensive, excellent for BI dashboards\n\n3 - Data Lakehouse\nExamples: Databricks + Delta Lake\nCharacteristics: Delta Lake storage + Warehouse capabilities, ACID transactions, time travel, schema enforcement and governance, cheap storage, fast compute (Spark + Photon engine), one platform for batch / streaming / ML / SQL",
+    "link": "https://www.ibm.com/think/topics/data-warehouse-vs-data-lake-vs-data-lakehouse"
+  },
+  {
+    "qid": "28",
+    "category": "Databricks",
+    "question": "How does Databricks work in a cloud service?",
+    "quick_answer": "Databricks works in a cloud service by providing a managed Spark-based platform that runs on cloud infrastructure (like storage and compute), where users create clusters to process data stored in cloud storage.",
+    "short_answer": "Databricks is a cloud-based data platform built on top of Apache Spark, designed to simplify big data processing and analytics.\nIt does not store data inside Databricks itself. Instead, it uses cloud infrastructure (compute + storage) from cloud providers.\n\nDatabricks supports:\n- Amazon Web Services (AWS)\n- Microsoft Azure\n- Google Cloud Platform (GCP)\n\nHow Databricks Works in the Cloud\n- Databricks runs on top of cloud providers (AWS, Azure, GCP).\n- Uses cloud storage (e.g., S3, ADLS, GCS) as the data lake.\n- Users create clusters (VMs) to run Spark workloads.\n- Notebooks are used to write Python, SQL, Scala, or R.\n- Databricks automatically manages: Cluster setup, Scaling, Monitoring\n- Uses Delta Lake for optimized data storage.\n- Jobs run in distributed Spark executors.\n- Results stored back to cloud storage.",
+    "link": "https://docs.databricks.com/aws/en/getting-started/high-level-architecture"
+  },
+  {
+    "qid": "29",
+    "category": "Databricks",
+    "question": "What is the high-level architecture of Databricks?",
+    "quick_answer": "Databricks = a Lakehouse platform built on top of cloud object storage\nIt has a control plane managed by Databricks, and a Data plane in your cloud service where: Compute Clusters process data using Spark, SQL, Delta Lake and Unity Catalog for governance",
+    "short_answer": "Databricks architecture has 2 main parts:\n\n1 - Control Plane - fully managed by Databricks (notebooks, jobs, cluster configs, workspace UI, metadata)\n+ Host the workspace UI, job schedulers, notebooks, cluster definitions, authentication, metadata like query history. This part never touches your actual business data\n\n2 - Data Plane - your cloud environment where clusters run and data lives in object storage\n+ Where all the compute runs: Spark Clusters, SQL warehouses, and streaming jobs. All execution happens against your own object storage using Delta Lake, which brings ACID transactions, time travel, and optimized metadata layouts\nIt uses:\n+ Delta Lake as the storage layer\n+ Spark as the compute engine\n+ Unity Catalog for centralized governance. \n→ This creates the Lakehouse: one platform for ETL, streaming, ML, and analytics",
+    "link": "https://docs.databricks.com/aws/en/getting-started/high-level-architecture"
+  },
+  {
+    "qid": "30",
+    "category": "Databricks",
+    "question": "What is the difference between control plane and data plane?",
+    "quick_answer": "Control plane = fully managed by Databricks - hosts the workspace UI, notebooks,job scheduler, cluster config, metadata and authentication\nData plane = runs inside your project - this is where Databricks launches GKE clusters, executes Spark jobs, and reads/write to your Cloud Storage buckets using Delta Lake. Your raw data never leaves your cloud boundary",
+    "short_answer": "Control Plane\n- Manages cluster creation\n- Handles job scheduling\n- Manages user interface (UI)\n- Controls security and permissions\n- Stores metadata\n- Does NOT process data directly\n- Usually managed by the platform provider\n\nData Plane\n- Executes actual data processing\n- Runs Spark jobs\n- Contains driver and worker nodes\n- Reads/writes data from storage\n- Runs inside customer's cloud environment\n- Handles data movement and computation\n\nKey Difference\n- Control Plane = Management layer\n- Data Plane = Execution layer",
+    "link": "https://docs.databricks.com/aws/en/getting-started/high-level-architecture"
+  },
+  {
+    "qid": "31",
+    "category": "Databricks",
+    "question": "What is Serverless Compute in Databricks and when do we need this?",
+    "quick_answer": "Serverless Compute in Databricks is a fully managed compute model where Databricks automatically provisions and manages infrastructure, so users don’t need to create or manage clusters.\nUse it when you want fast startup, minimal management, and automatic scaling, especially for SQL analytics and short workloads.",
+    "short_answer": "What is Serverless Compute?\n- Serverless Compute in Databricks allows users to run workloads without managing clusters or infrastructure.\n\nHow Serverless Compute Works\nUnder the hood:\n- User submits query/job\n- Databricks automatically provisions compute\n- Workload runs\n- Compute shuts down automatically\nAll handled automatically.\n\nWhen Do We Need Serverless Compute?\nUse Serverless Compute in specific scenarios where speed and simplicity matter.\n\nWhen NOT to Use Serverless Compute?\nNot ideal for:\n- Long-running batch jobs (10-hour nightly pipeline)\n- Highly customized workloads (need custom libraries, special hardware, low-level Spark tuning)\n\nPerformance Benefits\nServerless Compute provides:\n- Fast startup (seconds)\n- Automatic scaling\n- High concurrency\n- Reduced idle time\n- Built-in optimization\nEspecially strong for:\n- SQL analytics\n- Dashboard queries",
+    "link": "https://docs.databricks.com/aws/en/compute"
+  },
+  {
+    "qid": "32",
+    "category": "Databricks",
+    "question": "What is Jobs and Tasks in Databricks?",
+    "quick_answer": "Job = scheduled or triggered workflow\nTask = Individual steps inside that workflow",
+    "short_answer": "Databricks Jobs: provide orchestration of workflows\nYou can schedule jobs, configure retries, alerts, parameters, and link to version-controlled repos. A job can contain multiple Tasks with a directed dependency graph\n\nTask: represents a unit of work - running a Notebook, Python script, JAR, SQL query, or a DLT pipeline.\nTasks support retries, cluster selection, parameters, and branching logic.\n\nKey Difference\n-> Job = Workflow\n-> Task = Step inside workflow",
+    "link": "https://docs.databricks.com/aws/en/jobs"
+  },
+  {
+    "qid": "33",
+    "category": "Databricks",
+    "question": "What is Job Cluster and All-purpose cluster in Databricks?",
+    "quick_answer": "Job Cluster: A temporary cluster created only for running a job and terminated afterward.\nAll-purpose Cluster: A reusable cluster used for interactive development and multiple workloads.",
+    "short_answer": "Job Cluster\n- Created automatically when a job starts\n- Deleted after job finishes\n- Used for scheduled workflows\n- Cost-efficient (no idle time)\n- Ideal for production pipelines\n- Not shared across multiple jobs (typically)\n\nAll-purpose Cluster\n- Created manually by users\n- Remains running until manually stopped\n- Used for interactive development\n- Shared by multiple users\n- Good for notebooks and testing\n- Costs more if left running idle\n\nKey Difference\n- Job Cluster = Temporary, automated\n- All-purpose Cluster = Persistent, reusable",
+    "link": "https://docs.databricks.com/aws/en/compute/clusters-manage"
+  },
+  {
+    "qid": "34",
+    "category": "Data Engineering",
+    "question": "What is SCD (Slowly Changing Dimension)?",
+    "quick_answer": "Slowly Changing Dimension (SCD) is a technique in Data Warehousing used to manage changes in dimension data over time, such as customer address or product details.",
+    "short_answer": "What is SCD?\n- Slowly Changing Dimension (SCD) is a concept used in Data Warehousing to manage how dimension table data changes over time.\n\nTypes of Slowly Changing Dimensions\nThere are several SCD types, but Type 1, Type 2, and Type 3 are the most commonly used.\n- Type 0 - Fixed Dimension\n- Type 1 - Overwrite Old Data\n- Type 2 - Add New Row (Most Important)\n- Type 3 - Add New Column",
+    "link": "https://learn.microsoft.com/en-us/sql/integration-services/data-flow/transformations/slowly-changing-dimension-transformation?view=sql-server-ver17"
+  },
+  {
+    "qid": "35",
+    "category": "Databricks",
+    "question": "Explain types of SCD (Slowly Changing Dimesion)",
+    "quick_answer": "SCD Types define how changes in dimension data are handled over time in Data Warehousing.\nThe most common types are Type 0, Type 1, Type 2, Type 3, with Type 2 being the most widely used.",
+    "short_answer": "Type 0: Never update\nUse When: immutable dimensions\nNote: Rare\n\nType 1: Overwrite changed fields (no history)\nUse When: you only need current view\nNote: Simple MERGE with update\n\nType 2: Keep prior version row, add a new row with versioning / effective dates\nUse When: You need as of reporting\nNote: Requires is_current, effective_from/to\n\nType 3: Keep limited history in extra columns\nUse When: Track \"\"previous_xxx\"\"\nNote: Rare in Lakehouse\n\nType 4: Separate history table\nUse When: Very large tables or compliance\nNote: Split currect vs history\n\nType 6 (Hybrid): Combine Types 1+2+3\nUse When: track current & previous + retain history\nNote: Complex, not common",
+    "link": "https://www.sqlshack.com/implementing-slowly-changing-dimensions-scds-in-data-warehouses/"
   }
 ]

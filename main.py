@@ -4,6 +4,7 @@ import os
 import random
 import time
 import re
+import csv
 import json
 from datetime import datetime
 from openai import OpenAI
@@ -132,6 +133,52 @@ def load_new_question():
     answer_text.delete("1.0", tk.END)
     start_time = time.time()
     update_timer()
+
+def write_daily_csv(record):
+    # Step 1 — Create output folder
+    output_folder = os.path.join(BASE_DIR, "output")
+    os.makedirs(output_folder, exist_ok=True)
+
+    # Step 2 — Date format DDMMYYYY
+    date_str = datetime.now().strftime("%d%m%Y")
+
+    # Step 3 — Daily ID (fixed for now)
+    daily_id = ""
+
+    # Step 4 — Build filename
+    file_name = f"itv_daily_{date_str}{daily_id}.csv"
+    file_path = os.path.join(output_folder, file_name)
+
+    # Step 5 — Select only required columns
+    csv_row = [
+        record["id"],
+        record["submitted_at"],
+        record["time_taken_minutes"],
+        record["score"],
+        record["question_id"]
+    ]
+
+    headers = [
+        "id",
+        "submitted_at",
+        "time_taken_minutes",
+        "score",
+        "question_id"
+    ]
+
+    # Step 6 — Check if file exists
+    file_exists = os.path.isfile(file_path)
+
+    # Step 7 — Write CSV
+    with open(file_path, mode="a", newline="", encoding="utf-8") as file:
+        writer = csv.writer(file)
+
+        # Write header only once
+        if not file_exists:
+            writer.writerow(headers)
+
+        # Append row
+        writer.writerow(csv_row)
 
 # ================= LOADING SPINNER =================
 spinner_running = False
@@ -477,6 +524,9 @@ def submit_answer():
         }
         history.append(new_record)   # ← always store, never replace
 
+        # Write daily
+        write_daily_csv(new_record)
+
         with open(HISTORY_PATH, "w", encoding="utf-8") as f:
             for h in history:
                 json.dump(h, f, ensure_ascii=False)
@@ -525,7 +575,10 @@ def submit_answer():
             "what you did good",
             "how can i",
             "bonus points if",
-            "on my answer"
+            "on my answer",
+            "possible follow-up",
+            "based on your",
+            "short ideal"
         ]
 
         for kw in keywords:
