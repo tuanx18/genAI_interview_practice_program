@@ -1,9 +1,18 @@
 from google.cloud import storage
 import os
+from datetime import datetime
+
+today = datetime.now().strftime("%d%m%Y")
+
+BASE_DIR = r"C:\Users\Admin\Desktop\Github Repos\genAI_interview_practice_program"
 
 # CONFIG
 BUCKET_NAME = "interview-practice-tool-storage"
-LOCAL_FILE = "output/itv_daily_31032026.csv"
+LOCAL_FILE = os.path.join(
+    BASE_DIR,
+    "output",
+    f"itv_daily_{today}.csv"
+)
 
 print(f"Uploading: {LOCAL_FILE}")
 
