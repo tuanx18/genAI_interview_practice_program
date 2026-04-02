@@ -422,5 +422,13 @@
     "quick_answer": "1. Staging (stg) → Clean and standardize raw data\n2. Intermediate (int) → Combine and transform data\n3. Mart (marts / fct / dim) → Business-ready tables for reporting\nThey follow this flow: Raw → Staging → Intermediate → Mart",
     "short_answer": "The 3 typical dbt layers are:\n1. Staging (stg) → Clean and standardize raw data\n2. Intermediate (int) → Combine and transform data\n3. Mart (marts / fct / dim) → Business-ready tables for reporting\nThey follow this flow: Raw → Staging → Intermediate → Mart.\n\nThese 3 layers organize models so pipelines can stay clean, scalable and understandable - very similiar to Medallion Architecture (Bronze - Silver - Gold) \n\nOverview of the 32 dbt layers:\n\nRaw Data (Bronze)\n       ↓\nStaging (stg)      → Clean\n       ↓\nIntermediate (int) → Transform & Join\n       ↓\nMart (marts)       → Business Output\n\nThink of it as: Make data usable → Combine data → Deliver insights",
     "link": "https://docs.getdbt.com/best-practices/how-we-structure/1-guide-overview?version=1.12"
+  },
+  {
+    "qid": "54",
+    "category": "Snowflake",
+    "question": "How does Airflow (or any schedule/trigger service) trigger dbt runs?",
+    "quick_answer": "Airflow triggers dbt runs by executing dbt CLI commands (like dbt run) as scheduled tasks inside an Airflow DAG.\nIn simpler terms: Airflow scheduler → runs dbt command → dbt builds models in warehouse",
+    "short_answer": "Airflow triggers dbt runs by executing dbt CLI commands (like dbt run) as scheduled tasks inside an Airflow DAG.\nIn simpler terms: Airflow scheduler → runs dbt command → dbt builds models in warehouse\n\nThe Core Idea: Airflow does not integrate magically with dbt.\nInstead: Airflow runs dbt commands the same way you run them in terminal.\n\nStep-by-step: Howw Airflow Triggers dbt\nTypical workflow:\n1. Airflow schedule starts\n2. Airflow runs dbt command\n3. dbt sends SQL to warehouse\n4. Warehouse builds table\n5. Airflow marks task complete\n\nExample Airflow DAG running dbt:\n************************************************\nfrom airflow import DAG\nfrom airflow.operators.bash import BashOperator\nfrom datetime import datetime\n\nwith DAG(\n    dag_id=\"run_dbt_models\",\n    start_date=datetime(2024, 1, 1),\n    schedule_interval=\"@daily\",\n    catchup=False\n):\n\n    dbt_run = BashOperator(\n        task_id=\"run_dbt\",\n        bash_command=\"cd /path/to/dbt_project && dbt run\"\n    )\n************************************************",
+    "link": "https://docs.getdbt.com/docs/deploy/deployment-tools?version=1.12"
   }
 ]
