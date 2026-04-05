@@ -2,7 +2,7 @@
 
 **A powerful desktop tool to practice technical interview questions with real-time AI grading and feedback.**
 
-Built for Spark, Data Engineering, System Design, and other technical roles.  
+Built for Spark, Data Engineering, Data Modeling, System Design, and other technical roles.  
 You answer → GPT-4o-mini scores you (0–10) + gives detailed feedback + improvement tips + bonus suggestions.
 
 ---
@@ -11,13 +11,16 @@ You answer → GPT-4o-mini scores you (0–10) + gives detailed feedback + impro
 
 - Random question engine (no repeats in one session)
 - Category filter – practice only the topics you want
+- **Smart "Pick a Question" window** with live search bar (type any keyword → real-time filtering, case-insensitive)
+- Clean question display format: `57 — Data Modeling: What is Data Vault modeling?` (no more "Q57")
+- Questions sorted numerically by ID
 - Live timer per question + Reset Timer button
 - "Read more" button – opens external link or lets you add one instantly
 - Smart AI feedback with:
   - Colored score (green/orange/red)
   - Bold sections: **What You Did Well**, **How to Improve**, **Bonus Points Suggestions**
   - Scrollable content + separate Reference/Model Answer section
-- Retry / Replace last attempt on the same question
+- Retry This Question (creates a new attempt record)
 - History viewer:
   - All history
   - Only current question history
@@ -25,7 +28,6 @@ You answer → GPT-4o-mini scores you (0–10) + gives detailed feedback + impro
 - Debug mode (prints full prompt + GPT response to console)
 - Professional Question Builder (`builder.py`) – easy GUI to add/edit questions
 - Loading spinner while waiting for AI
-- Copy Feedback button
 - History saved permanently in `history.jsonl`
 
 ---

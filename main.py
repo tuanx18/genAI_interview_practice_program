@@ -359,12 +359,12 @@ def pick_question():
         messagebox.showinfo("No questions", "No questions available in your selected categories.")
         return
 
-    # Sort by qid for nicer order
-    pool.sort(key=lambda q: q["qid"])
+    # Sort by qid NUMERICALLY (this fixes the "stupid sorting")
+    pool.sort(key=lambda q: int(q["qid"]) if isinstance(q.get("qid"), (str, int)) else 0)
 
     win = Toplevel(root)
     win.title("Pick a Question")
-    win.geometry("920x520")
+    win.geometry("920x580")          # slightly taller for the search bar + listbox
     win.configure(bg="#f5f5f5")
     win.resizable(True, True)
 
@@ -373,32 +373,73 @@ def pick_question():
           bg="#f5f5f5", 
           font=("Segoe UI", 12, "bold")).pack(pady=12)
 
-    # Combobox with nice display
-    combo_var = tk.StringVar()
-    combo = ttk.Combobox(win, 
-                         textvariable=combo_var, 
-                         state="readonly", 
-                         font=("Segoe UI", 10),
-                         width=110)
+    # ==================== SEARCH BAR ====================
+    search_frame = Frame(win, bg="#f5f5f5")
+    search_frame.pack(padx=25, pady=(0, 8), fill="x")
+
+    Label(search_frame, text="🔍 Search:", bg="#f5f5f5", font=("Segoe UI", 10)).pack(side="left")
     
-    display_list = []
-    qid_to_question = {}
+    search_var = tk.StringVar()
+    search_entry = tk.Entry(search_frame, 
+                            textvariable=search_var, 
+                            font=("Segoe UI", 10),
+                            width=90)
+    search_entry.pack(side="left", padx=8, fill="x", expand=True)
+    search_entry.focus_set()   # auto-focus so user can start typing immediately
+
+    # ==================== LISTBOX (filtered results) ====================
+    list_frame = Frame(win)
+    list_frame.pack(padx=25, pady=8, fill="both", expand=True)
+
+    listbox = tk.Listbox(list_frame, 
+                         font=("Segoe UI", 10),
+                         height=20,
+                         width=110,
+                         selectmode=tk.SINGLE)
+    scrollbar = Scrollbar(list_frame, orient="vertical", command=listbox.yview)
+    listbox.config(yscrollcommand=scrollbar.set)
+
+    listbox.pack(side="left", fill="both", expand=True)
+    scrollbar.pack(side="right", fill="y")
+
+    # Build display list (now without the "Q" prefix)
+    items = []                    # (display_text, question_dict)
+    qid_to_question = {}          # still useful for quick lookup
+
     for q in pool:
+        qid_str = str(q["qid"])
         short_text = q["question"][:115] + ("..." if len(q["question"]) > 115 else "")
-        display = f"Q{q['qid']} — {q['category']}: {short_text}"
-        display_list.append(display)
+        display = f"{qid_str} — {q['category']}: {short_text}"
+        
+        items.append((display, q))
         qid_to_question[display] = q
 
-    combo['values'] = display_list
-    combo.pack(padx=25, pady=8, fill="x")
+    # Refresh listbox with optional filter
+    def refresh_listbox(filter_text=""):
+        listbox.delete(0, tk.END)
+        filter_lower = filter_text.lower().strip()
+        
+        for display, q in items:
+            if not filter_text or filter_lower in display.lower():
+                listbox.insert(tk.END, display)
 
-    # Load selected question
+    # Initial population
+    refresh_listbox()
+
+    # Live search (updates instantly as you type)
+    def on_search(*args):
+        refresh_listbox(search_var.get())
+    
+    search_var.trace("w", on_search)
+
+    # ==================== LOAD SELECTED QUESTION ====================
     def load_selected():
-        selected_display = combo_var.get()
-        if not selected_display:
-            messagebox.showwarning("Select", "Please choose a question.")
+        selection = listbox.curselection()
+        if not selection:
+            messagebox.showwarning("Select", "Please choose a question from the list.")
             return
 
+        selected_display = listbox.get(selection[0])
         selected_q = qid_to_question[selected_display]
 
         # Replace current question
@@ -413,15 +454,19 @@ def pick_question():
 
         win.destroy()
 
+    # Buttons & bindings
     Button(win, 
            text="✅ Load This Question", 
            command=load_selected,
            bg="#27ae60", 
            fg="white", 
-           font=("Segoe UI", 11, "bold")).pack(pady=20)
+           font=("Segoe UI", 11, "bold")).pack(pady=15)
 
-    # Bonus: Press Enter in combobox also loads
-    combo.bind("<Return>", lambda e: load_selected())
+    listbox.bind("<Double-1>", lambda e: load_selected())
+    listbox.bind("<Return>", lambda e: load_selected())
+
+    # Bonus: pressing Enter in the search box also selects the first result (very handy)
+    search_entry.bind("<Return>", lambda e: load_selected() if listbox.size() > 0 else None)
 
 def open_categories():
     top = Toplevel(root)
