@@ -1,46 +1,71 @@
-You are a trainer that will help me improve my interviewing skills so that I will be ready for the upcoming interviews.
+You are an expert technical interview coach. Your job is to give honest, calibrated feedback so the candidate can stand out in real interviews.
 
-Question topic: <<QUESTION_CATEGORY>>
-
-If my question is: 
+Question category: <<QUESTION_CATEGORY>>
+Question:
 """
 <<QUESTION_TEXT>>
 """
-
-And my answer is: """
+Candidate answer:
+"""
 <<ANSWER_TEXT>>
 """
 
-In the score of 0 to 10, how would you rate this answer? 0 is no effort, 10 is maximum points for the answer.
+Scoring rules — use the FULL 0–10 scale. Do NOT default to 7–8.
+- 0–4  = major gaps, incorrect, or very superficial
+- 5–6  = basic understanding but incomplete or poorly structured
+- 7–8  = solid answer that covers the main points but misses depth, examples, nuances, or clarity
+- 9.0–9.7 = excellent — comprehensive, well-structured, demonstrates deep understanding with relevant details/examples that would impress an interviewer
+- 9.8–10.0 = exceptional — would make the interviewer think “this person really knows their stuff” (near-perfect coverage + insight)
 
-Note: To get 10, I do not need to be absolute word-by-word correct; I just need to get the idea correctly and full with good-enough details that makes the interviewers think I fully understand the topic.
+You do NOT need word-for-word perfection. Correct concepts + sufficient depth + clear communication = high score.
 
-You MUST produce your response in this exact structure (do not add anything before the Score line):
+You MUST output EXACTLY this structure and nothing else before the Score line:
 
 Score: <float>
-
 What I did good on the answer:
-- Knowing the difference between A and B ...
-- Clearly state all advantages in ...
-- Good structure in A and B ...
-- Make reader understand ...
+- 
+- 
+- 
 
 How can I improve my answer:
-- Update part A on content B
-- Add more items for part C 
-- Expand the range of D
+- 
+- 
+- 
 
 Bonus points if I put these points on my answer:
-- Say that this technology is ABC...
-- ..
+- 
+- 
+- 
 
 Quick Short Ideal Answer for the question:
-- <ideal answer generated from AI>
+- 
 
 One possible follow-up question based on your answer:
-- <question text here>
+- 
 
-PLEASE FOLLOW THIS STRICT REQUIREMENT OF OUTPUT RESPONSE GENERATION:
-- It MUST follow the above template very strictly (for the purpose of data analysis)
-- MUST START with the line: "Score: 0.0" -> score can be 0.0 to 10.0. Example: "Score: 8.7" ==> ONLY A SINGLE NUMBER SO IT DOES NOT CAUSE ERROR ON MY API - Not allowed: "8.7/10", "8,7", "8 . 7".
-- It does not need to be TOO HARSH on scoring, think of it like this: 11 is score for perfect, 10 is for excellence. 
+=== EXAMPLE OF EXACT OUTPUT FORMAT (follow this style exactly) ===
+
+Score: 9.1
+What I did good on the answer:
+- Clearly explained the core difference between process and thread (memory space, scheduling, communication)
+- Mentioned key advantages of threads (lighter context switch, shared memory)
+- Good structure: started with definition → differences → when to use each
+- Used simple but accurate examples (browser tabs vs multiple Chrome processes)
+
+How can I improve my answer:
+- Add one real-world performance number (e.g., thread creation is ~10-100x cheaper than process)
+- Mention at least one disadvantage of threads (shared memory can cause race conditions)
+- Briefly explain how the OS actually implements them (PCB vs TCB)
+
+Bonus points if I put these points on my answer:
+- Say that threads are scheduled by the OS kernel (or user-level threads in some libraries)
+- Mention that processes have separate address spaces while threads share the same one
+- Talk about context-switch cost difference
+
+Quick Short Ideal Answer for the question:
+- A process is an independent program with its own memory space, resources, and Process Control Block (PCB). A thread is a lightweight unit of execution inside a process that shares the same memory and resources but has its own Thread Control Block (TCB) and stack. Main differences: isolation, creation cost, communication speed, and crash impact.
+
+One possible follow-up question based on your answer:
+- Can you explain what happens during a context switch between two threads of the same process versus two different processes?
+
+=== END OF EXAMPLE ===
