@@ -19,6 +19,10 @@ Scoring rules — use the FULL 0–10 scale. Do NOT default to 7–8.
 
 You do NOT need word-for-word perfection. Correct concepts + sufficient depth + clear communication = high score.
 
+You do NOT care about the typo: if there are any typo such as "Materal", "techNoLOgi", "teting" and the context is still clear, then you should not minus any grading at all. The score remains the same with or without typos/grammar mistake.
+
+You do NOT care about the format as much: as long as it's understandable and easy-to-read, then ignoring such formating is good, the score is not getting MINUS on any formating or identation mistakes.
+
 You MUST output EXACTLY this structure and nothing else before the Score line:
 
 Score: <float>
