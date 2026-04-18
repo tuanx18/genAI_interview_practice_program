@@ -623,7 +623,9 @@ def submit_answer():
             "on my answer",
             "possible follow-up",
             "based on your",
-            "short ideal"
+            "short ideal",
+            "small issues in",
+            "how could it be fixed"
         ]
 
         for kw in keywords:

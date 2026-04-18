@@ -10,26 +10,39 @@ Candidate answer:
 <<ANSWER_TEXT>>
 """
 
-Scoring rules — use the FULL 0–10 scale. Do NOT default to 7–8.
-- 0–4  = major gaps, incorrect, or very superficial
-- 5–6  = basic understanding but incomplete or poorly structured
-- 7–8  = solid answer that covers the main points but misses depth, examples, nuances, or clarity
-- 9.0–9.7 = excellent — comprehensive, well-structured, demonstrates deep understanding with relevant details/examples that would impress an interviewer
-- 9.8–10.0 = exceptional — would make the interviewer think “this person really knows their stuff” (near-perfect coverage + insight)
+Scoring rules — use the FULL 0–10 scale with one decimal precision.
 
-You do NOT need word-for-word perfection. Correct concepts + sufficient depth + clear communication = high score.
+Band reference:
+- 0.0–3.9  = major gaps, incorrect, or very superficial
+- 4.0–5.9  = basic understanding but incomplete or poorly structured
+- 6.0–7.4  = touches the main points but missing depth, examples, or clarity
+- 7.5–8.4  = solid answer, covers most points, minor gaps in nuance or detail
+- 8.5–9.4  = strong answer — comprehensive, well-structured, would impress most interviewers
+- 9.5–9.9  = excellent — deep insight, concrete examples, near-perfect coverage
+- 10.0     = exceptional — would make the interviewer think "hire this person immediately"
 
-You do NOT care about the typo: if there are any typo such as "Materal", "techNoLOgi", "teting" and the context is still clear, then you should not minus any grading at all. The score remains the same with or without typos/grammar mistake.
+Scoring and Response Structure rules:
 
-You do NOT care about the format as much: as long as it's understandable and easy-to-read, then ignoring such formating is good, the score is not getting MINUS on any formating or identation mistakes.
+- Pick the band first based on content quality, THEN pick the exact decimal based on how strongly it fits.
 
-You MUST output EXACTLY this structure and nothing else before the Score line:
+- You do NOT need word-for-word perfection. Correct concepts + sufficient depth + clear communication = high score.
+
+- You do NOT care about the typo: if there are any typo such as "Materal", "techNoLOgi", "teting" and the context is still clear, then you should not minus any grading at all. The score remains the same with or without typos/grammar mistake.
+
+- You do NOT care about the format as much: as long as it's understandable and easy-to-read, then ignoring such formating is good, the score is not getting MINUS on any formating or identation mistakes.
+
+- You MUST output EXACTLY this structure and nothing else before the Score line:
 
 Score: <float>
 What I did good on the answer:
 - 
 - 
 - 
+
+Some small issues in your current answer & how could it be fixed:
+-
+-
+-
 
 How can I improve my answer:
 - 
@@ -60,6 +73,11 @@ How can I improve my answer:
 - Add one real-world performance number (e.g., thread creation is ~10-100x cheaper than process)
 - Mention at least one disadvantage of threads (shared memory can cause race conditions)
 - Briefly explain how the OS actually implements them (PCB vs TCB)
+
+Some small issues in your current answer & how could it be fixed:
+- "threads share memory with the process" → "threads share the same address space within a process": Sharing "memory" is vague — what they actually share is the virtual address space (code, heap, globals). 
+- "context switch is cheaper for threads" → "context switch between threads of the same process is cheaper": The cheaper cost only applies to same-process threads. Cross-process thread switches still require 
+- "process is heavier" → "process creation and switching has higher overhead": "Heavier" is informal and imprecise. The actual cost difference comes from allocating a separate address space, copying page tables (fork), and initializing a full PCB
 
 Bonus points if I put these points on my answer:
 - Say that threads are scheduled by the OS kernel (or user-level threads in some libraries)
