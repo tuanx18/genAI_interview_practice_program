@@ -54,7 +54,7 @@ Bonus points if I put these points on my answer:
 - 
 - 
 
-Quick Short Ideal Answer for the question:
+Quick Short Ideal Answer for the question (perfect answer for interview):
 - 
 
 One possible follow-up question based on your answer:
@@ -84,7 +84,7 @@ Bonus points if I put these points on my answer:
 - Mention that processes have separate address spaces while threads share the same one
 - Talk about context-switch cost difference
 
-Quick Short Ideal Answer for the question:
+Quick Short Ideal Answer for the question (perfect answer for interview):
 - A process is an independent program with its own memory space, resources, and Process Control Block (PCB). A thread is a lightweight unit of execution inside a process that shares the same memory and resources but has its own Thread Control Block (TCB) and stack. Main differences: isolation, creation cost, communication speed, and crash impact.
 
 One possible follow-up question based on your answer:
